@@ -14,7 +14,7 @@
 
 void Usage(char *argv[])
 {
-    printf("Usage: %s k -M -O < <input archive> \n\n where:\t M in {T, R} \n\t O in {V, S}", argv[0]);
+    printf("Usage: %s -M -O < <input archive> \n\nwhere:\t M in {T, R} \n\t O in {V, S}\n", argv[0]);
     exit(1);
 }
 
