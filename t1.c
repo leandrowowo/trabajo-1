@@ -19,6 +19,9 @@
 #include <sys/types.h>
 #include <time.h>
 
+#define VERBOSE 1
+#define SILENCE 0
+
  /*
  * FUNCTIONS
  */
@@ -79,9 +82,21 @@ int transformar(int **numbers, int m, int n, int *num1, int *num2){
         *num2 = *num2*10 + numbers[1][i]; // lo mismo para este pero con la fila 1
 }
 
-int russian_secuential(int *a, int *b){
+int russian_secuential(int *a, int *b, int mode){
+
     int multiply =  0;
+
+    if (mode == 1) {
+        printf("Proceso de datos:\n"); //Solo si es verboso
+        printf("a ------ b\n");
+        printf("------------ \n");
+    }
+
     while (*a >= 1 && *b > 0) {
+
+        if(mode == 1)
+        printf("%d \t %d\n", *a, *b);
+
         if (*a % 2 != 0) { // Si a es impar
             multiply = multiply + *b;
         }
@@ -99,7 +114,7 @@ int russian_secuential(int *a, int *b){
 
 int main (int argc, char **argv){
 
-    int m,n; // tamaño del arreglo
+    int m,n, mode; // tamaño del arreglo y el metodo
     int **numbers; //arreglo bidimensional
     int a, b; // numeros a multiplicar
     int result; // resultado de la multiplicacion
@@ -118,12 +133,12 @@ int main (int argc, char **argv){
     }
     
     if(strcmp(argv[2], "-T") == 0){
-        if (strcmp(argv[3], "-S") == 0)
-        {
+        if (strcmp(argv[3], "-S") == 0){
+            mode = SILENCE;
             //LEANDRO
         }
         else if(strcmp(argv[3], "-V") == 0){
-
+            mode = VERBOSE;
             //LEANDRO
         }
         else{
@@ -135,18 +150,27 @@ int main (int argc, char **argv){
     {
         if (strcmp(argv[3], "-S") == 0)
         {
+            mode = SILENCE;
             csc = clock(); // cpu start
-            result = russian_secuential(&a, &b);
+            result = russian_secuential(&a, &b, mode);
             cec = clock(); // cpu exit
 
             E_cpu = (float)(cec - csc) / CLOCKS_PER_SEC;
 
-            printf ("Resultado: %d\n", result);
-            printf("CPU time: %f\n", E_cpu);
+            printf ("\nResultado: %d\n", result);
+            printf("\nCPU time: %f\n\n", E_cpu);
         }
-        else if(strcmp(argv[3], "-V") == 0){
 
-            //FALTA HACER MODO VERBOSO
+        else if(strcmp(argv[3], "-V") == 0){
+            mode = VERBOSE;
+            csc = clock() ;
+            result = russian_secuential(&a, &b, mode);
+            cec = clock(); // cpu exit
+
+            E_cpu = (float)(cec - csc) / CLOCKS_PER_SEC;
+
+            printf ("\nResultado: %d\n", result);
+            printf("\nCPU time: %f\n", E_cpu);
         }
         else{
             Usage(argv[0]);
