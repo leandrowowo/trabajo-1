@@ -11,6 +11,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 /*
     VARIABLES GLOBALES
@@ -31,9 +33,9 @@ void read_data(int *m, int *n, int ***numbers)
 {
     int i, j;
 
-    scanf("%d", m); // Cantidad de dígitos del primer número
     *numbers = (int **)calloc(2, sizeof(int *)); // Memoria para dos filas
 
+    scanf("%d", m); // Cantidad de dígitos del primer número
     (*numbers)[0] = (int *)calloc(*m, sizeof(int)); // Asignamos memoria para la primera fila cantidad M
 
     for(i = 0; i < *m; i = i + 1)
@@ -42,7 +44,6 @@ void read_data(int *m, int *n, int ***numbers)
     }
 
     scanf("%d", n); // Cantidad de dígitos del segundo número
-
     (*numbers)[1] = (int *)calloc(*n, sizeof(int)); // Asignamos memoria para la segunda fila cantidad N
 
     for(j = 0; j < *n; j = j + 1)
@@ -51,7 +52,7 @@ void read_data(int *m, int *n, int ***numbers)
     }
 }
 
-void transformation(int **numbers, int m, int n, int *num1, int *num2)
+void transformation(int **numbers, int m, int n, unsigned int *num1, unsigned int *num2)
 {
     int i, j;
 
@@ -60,13 +61,37 @@ void transformation(int **numbers, int m, int n, int *num1, int *num2)
 
     for(i = 0; i < m; i = i + 1)
     {
-        *num1 = *num1 * 10 + numbers[0][i];
+        *num1 = (*num1 * 10) + numbers[0][i];
     }
 
     for(j = 0; j < n; j = j + 1)
     {
-        *num2 = *num2 * 10 + numbers[1][j];
+        *num2 = (*num2 * 10) + numbers[1][j];
     }
+}
+
+unsigned long long traditional_mult(unsigned int a, unsigned int b, float *CPUtime)
+{
+    unsigned int digit;
+    unsigned long long partial_result;
+    unsigned long long result = 0;
+    unsigned long long factor = 1; // Equivale a las potencias de 10 al momento de multiplicar y correrse un espacio
+    clock_t start, finish; // Tiempos de CPU
+
+    start = clock();
+    while(b > 0)
+    {
+        digit = b % 10;     // Toma el último dígito del segundo factor
+        partial_result = (unsigned long long)a * digit;     // 'a' se convierte a unsigned long long para evitar overflow en la multiplicación
+        result = result + partial_result * factor;
+        b = b / 10;     // Divide por 10 para tomar el siguiente digito a multiplicar en la próxima iteración
+        factor = factor * 10;
+    }
+    finish = clock();
+
+    *CPUtime = (float)(finish - start)/CLOCKS_PER_SEC; 
+
+    return result;
 }
 
 void imprimir(int m, int n, int **numbers)
@@ -94,8 +119,12 @@ void imprimir(int m, int n, int **numbers)
 */
 int main(int argc, char **argv)
 {
-    int m, n, a, b; // Cantidad de dígitos para números de entrada
+    int m, n; 
+    unsigned int a, b; // Cantidad de dígitos para números de entrada
     int **numbers; // Arreglo bidimensional
+    unsigned long long resultado;
+    clock_t start, finish;
+    float CPU_time, wall_time;
 
     if(argc != 2)
     {
@@ -103,23 +132,36 @@ int main(int argc, char **argv)
     }
     else
     {
+        start = clock();
         read_data(&m, &n, &numbers);
 
         transformation(numbers, m, n, &a, &b);
 
-        printf("Primer número: %d\nSegundo número: %d\n", a, b);
-        
-        //imprimir(m, n, numbers);
+        resultado = traditional_mult(a, b, &CPU_time);
+        finish = clock();
 
-        // if(argv[1] == "-S")
-        // {
-        //     //tradMult_secuential();
-        // }
-        // else if(argv[1] == "-V")
-        // {
-        //     /* code */
-        // }
+        wall_time = (float)(finish - start)/CLOCKS_PER_SEC;
+
+        if(!strcmp(argv[1], "-V"))
+        {
+            printf("Primer factor: %u\n", a);
+            printf("Segundo factor: %u\n", b);
+            printf("Resultado multiplicación: %llu\n", resultado);
+            printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
+            printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+        }
+        else if(!strcmp(argv[1], "-S"))
+        {
+            printf("Número de dígitos primer valor: %d\n", m);
+            printf("Número de dígitos segundo valor: %d\n", n);
+            printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
+            printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+        }
     }
+
+    free(numbers[0]);
+    free(numbers[1]);
+    free(numbers);
 
     return 0;
 }
