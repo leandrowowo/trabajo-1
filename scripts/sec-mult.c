@@ -1,6 +1,6 @@
 /***************************************************************************************
  * 
- * mult_trad_sec.c: Programa que calcula la multiplicación de dos números de manera secuencial
+ * sec-mult.c: Programa que calcula la multiplicación de dos números de manera secuencial
  *                  a través del método tradicional
  *
  * Programmer: Leandro Aballay Henriquez - Delian Santis Lopez
