@@ -7,8 +7,9 @@
  *              - Tradicional.        
  *              - Paralelizado (utilizando pthreads).
  * 
- * AUTHOR: Delian Santis López
- *
+ * AUTHOR: Delian Santis López - Leandro Aballay Henriquez
+ * 
+ * ENTREGA: 06/10/2025
  * 
  *****************************************************************************/
 
@@ -18,78 +19,118 @@
 
 #define SILENT  0
 #define VERBOSE 1
-#define TRADITIONAL 2
+#define SECUENTIAL 2
 #define PARALLEL    3
 
 /*
  * PROTOTYPES
  */
+void read_data(int *m, int *n, int ***numbers);
 
+void imprimir(int m, int n, int **numbers);
+
+void Usage(char *message);
 
 
  /*
  * FUNCTIONS
  */
 
-unsigned long russian_multiplication(){
 
-}
-//PENDIENTE HACER UN READ DATA Y LLENAR CON DATOS LOS ARREGLOS 
-
- /*
- * 
- */
 void Usage(char *message) {
   
    printf("\nUsage: %s k -M -O < datafile",message);
    printf("\n\nk: number of threads (k >= 0)");
-   printf("\n\nM in {T,P} \t(T: Traditional, P: Parallel )");
+   printf("\n\nM in {T,P} \t(T: Secuential, P: Parallel )");
    printf("\n\nO in {S,V} \t (S: Silence, V: Verbose) \n\n");
 }
+
+void read_data(int *m, int *n, int ***numbers) {
+    scanf("%d", m); // cantidad de dígitos del primer número
+    *numbers = (int **)calloc(2, sizeof(int *)); // memoria para dos filas
+
+    (*numbers)[0] = (int *)calloc(*m, sizeof(int)); // asignamos memoria para la primera fila cantidad M
+
+    for(int i = 0; i < *m; i = i + 1)
+        scanf("%d", &(*numbers)[0][i]); //asignamos los valores a la primera fila
+
+    scanf("%d", n); // cantidad de dígitos del segundo número
+
+    (*numbers)[1] = (int *)calloc(*n, sizeof(int)); // asignamos memoria para la segunda fila cantidad N
+
+    for(int i = 0; i < *n; i = i + 1)
+        scanf("%d", &(*numbers)[1][i]); //asignamos los valores a la segunda fila
+}
+
+void imprimir(int m, int n, int **numbers){
+    printf("Primer numero: ");
+    for(int i = 0; i < m; i++)
+        printf("%d", numbers[0][i]);
+    printf("\n");
+
+    printf("Segundo numero: ");
+    for(int i = 0; i < n; i++)
+        printf("%d", numbers[1][i]);
+    printf("\n");
+}
+
+//transformar digitos del arreglo en un numero entero
+
+
+ /*
+ * 
+ */
 
 
 int main (int argc, char **argv){
 
     //metodos de compilacion
     int method, mode;
-    //
     int m,n; // tamaño del arreglo
-    int *numb1 = NULL, *numb2 = NULL; //arreglos para guardar los numeros
+    int **numbers; //arreglo bidimensional
+    
+    read_data(&m, &n, &numbers);
 
 
 
-    if (argc < 4) //Entrada incorrecta
+    if (argc != 4) //Entrada incorrecta
     {
         Usage(argv[0]);
         return 0;
     }
-
-
-    if (argc == 3){ //Entrada k -M -O < datafile.txt
     
-        if (strcmp(argv[2],"-T") == 0)
-            method = TRADITIONAL;
-        
-        else if(strcmp(argv[2],"-P") == 0)
-            method = PARALLEL;
-        else{
-            Usage(argv[0]);
-            return 0;
-        }
+    if(strcmp(argv[2],"-T") == 0 && strcmp(argv[3],"-S") == 0){
 
-        //HACER LLAMADA PARA LLENAR LOS ARREGLOS.
-        //read_data(&numb1, &numb2, &m, &n); //Pendiente hacer la funcion read_data
+        //ruso_secuencial();
 
-
-        if (strcmp(argv[1],"-S") == 0)
-            mode = SILENT;
-        if (strcmp(argv[1],"-V") == 0)
-            mode = VERBOSE;
-
-
-        if (method == TRADITIONAL)
-            russian_multiplication();
-        else if(method == PARALLEL)
-            russian_multiplication(); //Pendiente metodo paralelo
     }
+
+    else if(strcmp(argv[2],"-P") == 0 && strcmp(argv[3],"-S") == 0){
+
+        //ruso_paralelo();
+
+    }
+
+    else if(strcmp(argv[2],"-T") == 0 && strcmp(argv[3],"-V") == 0){
+
+        imprimir(m, n, numbers);
+        //ruso_secuencial();
+    }
+
+    else if(strcmp(argv[2],"-P") == 0 && strcmp(argv[3],"-V") == 0){
+
+        imprimir(m, n, numbers); //Funcion distinta para ver que le toca a cada hilo
+        //ruso_paralelo();
+    }
+        
+    else{
+        Usage(argv[0]);
+        return 0;
+    }
+
+    free(numbers[0]);
+    free(numbers[1]);
+    free(numbers);
+
+    return 0;
 }
