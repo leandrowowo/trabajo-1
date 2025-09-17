@@ -94,25 +94,6 @@ unsigned long long traditional_mult(unsigned int a, unsigned int b, float *CPUti
     return result;
 }
 
-void imprimir(int m, int n, int **numbers)
-{
-    int i, j;
-
-    printf("Primer número: ");
-    for(i = 0; i < m; i = i + 1)
-    {
-        printf("%d", numbers[0][i]);
-    }
-    printf("\n");
-
-    printf("Segundo número: ");
-    for(j = 0; j < n; j = j + 1)
-    {
-        printf("%d", numbers[1][j]);
-    }
-    printf("\n");
-}
-
 
 /*
     MAIN
