@@ -16,26 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define SILENT  0
-#define VERBOSE 1
-#define SECUENTIAL 2
-#define PARALLEL    3
-
-/*
- * PROTOTYPES
- */
-void read_data(int *m, int *n, int ***numbers);
-
-void imprimir(int m, int n, int **numbers);
-
-void Usage(char *message);
-
+#include <sys/types.h>
+#include <time.h>
 
  /*
  * FUNCTIONS
  */
-
 
 void Usage(char *message) {
   
@@ -46,6 +32,11 @@ void Usage(char *message) {
 }
 
 void read_data(int *m, int *n, int ***numbers) {
+
+    //PONER CONDICION DE QUE SI HAY MÁS DE DOS FILAS, ERROR
+    //PONER CONDICION DE QUE SI HAY MÁS DE 2 COLUMNAS, ERROR
+    //PONER CONDICION DE QUE SI HAY MÁS NUMEROS QUE LA CANTIDAD DE DIGITOS DE M Y N, ERROR
+
     scanf("%d", m); // cantidad de dígitos del primer número
     *numbers = (int **)calloc(2, sizeof(int *)); // memoria para dos filas
 
@@ -62,19 +53,41 @@ void read_data(int *m, int *n, int ***numbers) {
         scanf("%d", &(*numbers)[1][i]); //asignamos los valores a la segunda fila
 }
 
+//prueba para imprimir los numeros 
 void imprimir(int m, int n, int **numbers){
-    printf("Primer numero: ");
-    for(int i = 0; i < m; i++)
-        printf("%d", numbers[0][i]);
+    printf("\nPrimer numero: ");
+    for(int i = 0; i < m; i = i + 1)
+        printf("%d", numbers[0][i]); //impresion de la fila 0
     printf("\n");
 
-    printf("Segundo numero: ");
-    for(int i = 0; i < n; i++)
-        printf("%d", numbers[1][i]);
+    printf("\nSegundo numero: ");
+    for(int i = 0; i < n; i = i + 1)
+        printf("%d", numbers[1][i]); // impresion de la fila 1
     printf("\n");
 }
 
-//transformar digitos del arreglo en un numero entero
+int transformar(int **numbers, int m, int n, int *num1, int *num2){
+    *num1 = 0;
+    *num2 = 0;
+
+    for(int i = 0; i < m; i = i + 1)
+        *num1 = *num1*10 + numbers[0][i]; //transformar la fila 0 en un numero entero
+
+    for(int i = 0; i < n; i = i + 1)
+        *num2 = *num2*10 + numbers[1][i]; // lo mismo para este pero con la fila 1
+}
+
+int russian_secuential(int *a, int *b){
+    int multiply =  0;
+    while (*a >= 1 && *b > 0) {
+        if (*a % 2 != 0) { // Si a es impar
+            multiply = multiply + *b;
+        }
+        *a = *a / 2; // Dividir a entre 2
+        *b = *b * 2; // Multiplicar b por 2
+    }
+    return multiply;
+}
 
 
  /*
@@ -84,14 +97,17 @@ void imprimir(int m, int n, int **numbers){
 
 int main (int argc, char **argv){
 
-    //metodos de compilacion
-    int method, mode;
     int m,n; // tamaño del arreglo
     int **numbers; //arreglo bidimensional
+    int a, b; // numeros a multiplicar
+    int result; // resultado de la multiplicacion
+    float E_cpu;
+    clock_t csc, cec;
+
     
     read_data(&m, &n, &numbers);
 
-
+    transformar(numbers, m, n, &a, &b);
 
     if (argc != 4) //Entrada incorrecta
     {
@@ -101,8 +117,14 @@ int main (int argc, char **argv){
     
     if(strcmp(argv[2],"-T") == 0 && strcmp(argv[3],"-S") == 0){
 
-        //ruso_secuencial();
+        csc = clock(); // cpu start
+        result = russian_secuential(&a, &b);
+        cec = clock(); // cpu exit
 
+        E_cpu = (float)(cec - csc) / CLOCKS_PER_SEC;
+
+        printf ("Resultado: %d\n", result);
+        printf("CPU time: %f\n", E_cpu);
     }
 
     else if(strcmp(argv[2],"-P") == 0 && strcmp(argv[3],"-S") == 0){
@@ -114,7 +136,8 @@ int main (int argc, char **argv){
     else if(strcmp(argv[2],"-T") == 0 && strcmp(argv[3],"-V") == 0){
 
         imprimir(m, n, numbers);
-        //ruso_secuencial();
+        result = russian_secuential(&a, &b);
+        printf ("\n\nResultado: %d\n", result);
     }
 
     else if(strcmp(argv[2],"-P") == 0 && strcmp(argv[3],"-V") == 0){
