@@ -47,23 +47,43 @@ void read_data(int *m, int *n, int ***numbers)
 
     for(j = 0; j < *n; j = j + 1)
     {
-        scanf("%d", &(*numbers)[1][i]); //Asignamos los valores a la segunda fila
+        scanf("%d", &(*numbers)[1][j]); //Asignamos los valores a la segunda fila
+    }
+}
+
+void transformation(int **numbers, int m, int n, int *num1, int *num2)
+{
+    int i, j;
+
+    *num1 = 0;
+    *num2 = 0;
+
+    for(i = 0; i < m; i = i + 1)
+    {
+        *num1 = *num1 * 10 + numbers[0][i];
+    }
+
+    for(j = 0; j < n; j = j + 1)
+    {
+        *num2 = *num2 * 10 + numbers[1][j];
     }
 }
 
 void imprimir(int m, int n, int **numbers)
 {
+    int i, j;
+
     printf("Primer número: ");
-    for(int i = 0; i < m; i++)
+    for(i = 0; i < m; i = i + 1)
     {
         printf("%d", numbers[0][i]);
     }
     printf("\n");
 
     printf("Segundo número: ");
-    for(int i = 0; i < n; i++)
+    for(j = 0; j < n; j = j + 1)
     {
-        printf("%d", numbers[1][i]);
+        printf("%d", numbers[1][j]);
     }
     printf("\n");
 }
@@ -74,18 +94,22 @@ void imprimir(int m, int n, int **numbers)
 */
 int main(int argc, char **argv)
 {
-    int m, n; // Cantidad de dígitos para números de entrada
+    int m, n, a, b; // Cantidad de dígitos para números de entrada
     int **numbers; // Arreglo bidimensional
 
-    read_data(&m, &n, &numbers);
-    
-    if(argc != 3)
+    if(argc != 2)
     {
         Usage(argv);
     }
     else
     {
-        imprimir(m, n, numbers);
+        read_data(&m, &n, &numbers);
+
+        transformation(numbers, m, n, &a, &b);
+
+        printf("Primer número: %d\nSegundo número: %d\n", a, b);
+        
+        //imprimir(m, n, numbers);
 
         // if(argv[1] == "-S")
         // {
