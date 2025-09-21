@@ -19,11 +19,9 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define VERBOSE 1
-#define SILENCE 0
-
  /*
- * FUNCTIONS
+ *
+ *
  */
 
 void Usage(char *message) {
@@ -133,7 +131,6 @@ unsigned long long traditional_mult(unsigned long long int a, unsigned long long
         factor = factor * 10; 
         
     }
-
     return valor;
 }
 
@@ -142,17 +139,17 @@ unsigned long long traditional_mult(unsigned long long int a, unsigned long long
 *
 *
 */
-void print_data(unsigned int **numbers, unsigned int *m, unsigned int *n){
+void print_data(unsigned int **numbers, unsigned int m, unsigned int n){
     int i;
 
     printf("****** Archivo utilizado ******\n");
-    printf("%u\n", *m);                 //cantidad de digitos para m
-    for (i = 0; i < *m; i = i + 1)
+    printf("%u\n", m);                 //cantidad de digitos para m
+    for (i = 0; i < m; i = i + 1)
     {
         printf("%u\n", numbers[0][i]);  //imprimir digitos para la fila 0
     }
-    printf("%u\n", *m);                 //cantidad de digitos para n
-    for (i = 0; i < *m; i = i + 1)
+    printf("%u\n", m);                 //cantidad de digitos para n
+    for (i = 0; i < m; i = i + 1)
     {
         printf("%u\n", numbers[1][i]);  // imprimir digitos par la fila 1
     }
@@ -177,7 +174,6 @@ int main (int argc, char **argv){
     
     if(strcmp(argv[2], "-T") == 0){
         if (strcmp(argv[3], "-S") == 0){
-            mode = SILENCE;
 
             csc = clock(); // cpu start
             result = traditional_mult(a , b);
@@ -189,17 +185,16 @@ int main (int argc, char **argv){
             printf("\nCPU time: %f\n\n", E_cpu);
         }
         else if(strcmp(argv[3], "-V") == 0){
-            mode = VERBOSE;
-            
+
             csc = clock(); // cpu start
             result = traditional_mult(a , b);
             cec = clock(); // cpu exit
 
             E_cpu = (float)(cec - csc) / CLOCKS_PER_SEC;
 
-            print_data(numbers, &m, &n);
+            print_data(numbers, m, n);
 
-            printf("Multiplicate result: %llu\n", result);
+            printf("\nMultiplicate result: %llu\n", result);
             printf("\nCPU time: %f\n\n", E_cpu);
 
         }
@@ -210,9 +205,7 @@ int main (int argc, char **argv){
     }
     else if (strcmp(argv[2], "-R") == 0)
     {
-        if (strcmp(argv[3], "-S") == 0)
-        {
-            mode = SILENCE;
+        if (strcmp(argv[3], "-S") == 0){
             csc = clock(); // cpu start
             result = russian_secuential(a, b);
             cec = clock(); // cpu exit
@@ -224,14 +217,13 @@ int main (int argc, char **argv){
         }
 
         else if(strcmp(argv[3], "-V") == 0){
-            mode = VERBOSE;
-            csc = clock() ;
+            csc = clock(); // cpu start
             result = russian_secuential(a, b);
             cec = clock(); // cpu exit
 
             E_cpu = (float)(cec - csc) / CLOCKS_PER_SEC;
 
-            print_data(numbers, &m, &n);
+            print_data(numbers, m, n);
 
             printf ("\nMultiplicate result: %llu\n", result);
             printf("\nCPU time: %f\n", E_cpu);
