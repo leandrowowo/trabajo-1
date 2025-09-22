@@ -111,7 +111,7 @@ void printData(int mode)
     resultado = traditional_mult(a, b, &CPU_time);
     finish = clock();
 
-    wall_time = (float)(finish - start)/CLOCKS_PER_SEC;
+    wall_time = (float)(finish - start)/CLOCKS_PER_SEC; // Cálculo de tiempo de procesos (Wall time)
 
     if(mode == SILENT)
     {
@@ -125,16 +125,16 @@ void printData(int mode)
         printf("Contenido del archivo\n");
         printf("---------------------\n");
 
-        printf("%d\n", m);
+        printf("%d\n", m); // Imprime cantidad de dígitos del primer valor de entrada
         for(i = 0; i < m; i = i + 1)
         {
-            printf("%d\n", numbers[0][i]);
+            printf("%d\n", numbers[0][i]); // Imprime los dígitos del primer valor
         }
 
-        printf("%d\n", n);
+        printf("%d\n", n); // Imprime cantidad de dígitos del segundo valor de entrada
         for(j = 0; j < n; j = j + 1)
         {
-            printf("%d\n", numbers[1][j]);
+            printf("%d\n", numbers[1][j]); // Imprime los dígitos del segundo valor
         }
 
         printf("Resultado: %llu\n", resultado);
@@ -142,6 +142,7 @@ void printData(int mode)
         printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
     }
 
+    // Liberación de memoria
     free(numbers[0]);
     free(numbers[1]);
     free(numbers);
