@@ -52,6 +52,7 @@ void read_data(int *m, int *n, int ***numbers)
     }
 }
 
+
 void transformation(int **numbers, int m, int n, unsigned int *num1, unsigned int *num2)
 {
     int i, j;
@@ -94,18 +95,65 @@ unsigned long long traditional_mult(unsigned int a, unsigned int b, float *CPUti
     return result;
 }
 
+void printData(int mode)
+{
+    int m, n, **numbers, i, j;
+    unsigned int a, b;
+    unsigned long long resultado;
+    clock_t start, finish;
+    float CPU_time, wall_time;
+
+    start = clock();
+    read_data(&m, &n, &numbers);
+
+    transformation(numbers, m, n, &a, &b);
+
+    resultado = traditional_mult(a, b, &CPU_time);
+    finish = clock();
+
+    wall_time = (float)(finish - start)/CLOCKS_PER_SEC;
+
+    if(mode == SILENT)
+    {
+        printf("Número de dígitos primer valor: %d\n", m);
+        printf("Número de dígitos segundo valor: %d\n", n);
+        printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
+        printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+    }
+    else if(mode == VERBOSE)
+    {
+        printf("Contenido del archivo\n");
+        printf("---------------------\n");
+
+        printf("%d\n", m);
+        for(i = 0; i < m; i = i + 1)
+        {
+            printf("%d\n", numbers[0][i]);
+        }
+
+        printf("%d\n", n);
+        for(j = 0; j < n; j = j + 1)
+        {
+            printf("%d\n", numbers[1][j]);
+        }
+
+        printf("Resultado: %llu\n", resultado);
+        printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
+        printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+    }
+
+    free(numbers[0]);
+    free(numbers[1]);
+    free(numbers);
+}
+
 
 /*
     MAIN
 */
 int main(int argc, char **argv)
 {
-    int m, n; 
-    unsigned int a, b; // Cantidad de dígitos para números de entrada
-    int **numbers; // Arreglo bidimensional
-    unsigned long long resultado;
-    clock_t start, finish;
-    float CPU_time, wall_time;
+    int mode;
 
     if(argc != 2)
     {
@@ -113,36 +161,17 @@ int main(int argc, char **argv)
     }
     else
     {
-        start = clock();
-        read_data(&m, &n, &numbers);
-
-        transformation(numbers, m, n, &a, &b);
-
-        resultado = traditional_mult(a, b, &CPU_time);
-        finish = clock();
-
-        wall_time = (float)(finish - start)/CLOCKS_PER_SEC;
-
         if(!strcmp(argv[1], "-V"))
         {
-            printf("Primer factor: %u\n", a);
-            printf("Segundo factor: %u\n", b);
-            printf("Resultado multiplicación: %llu\n", resultado);
-            printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
-            printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+            mode = VERBOSE;
+            printData(mode);
         }
         else if(!strcmp(argv[1], "-S"))
         {
-            printf("Número de dígitos primer valor: %d\n", m);
-            printf("Número de dígitos segundo valor: %d\n", n);
-            printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
-            printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+            mode = SILENT;
+            printData(mode);
         }
     }
-
-    free(numbers[0]);
-    free(numbers[1]);
-    free(numbers);
 
     return 0;
 }
