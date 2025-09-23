@@ -30,7 +30,7 @@
 
 void Usage(char *message) {
   
-   printf("\nUsage: %s -M -O < datafile",message);
+   printf("\nUsage: %s -M -O < datafile",message); 
    printf("\n\nM in {T,R} \t(T: Traditional, R: Russian )");
    printf("\n\nO in {S,V} \t (S: Silence, V: Verbose) \n\n");
 }
@@ -178,59 +178,56 @@ void print_data(unsigned int **numbers, unsigned int m, unsigned int n){
 int main (int argc, char **argv){
 
     unsigned int m,n, **numbers;           //numero de columnas y el arreglo bidimensional
-    unsigned long long int a, b, result;         // resultado de la multiplicación
+    unsigned long long int a, b, result;   // resultado de la multiplicación
     int mode;
     float E_cpu, wall_time;
     clock_t start, finish;
 
-    start = clock();
-    read_data(&m, &n, &numbers);
-    transformar(numbers, m, n, &a, &b);
-    finish = clock();
-
-    wall_time = (float)(finish - start) / CLOCKS_PER_SEC;
-
     if (argc == 3){
 
+        // Determinar modo
         if(strcmp(argv[2], "-S") == 0)
             mode = SILENT;
-
-        if(strcmp(argv[2], "-V") == 0)
+        else if(strcmp(argv[2], "-V") == 0)
             mode = VERBOSE;
+        else {
+            Usage(argv[0]);
+            return EXIT_FAILURE;
+        }
 
+        start = clock();   // inicia medición de wall time
+
+        read_data(&m, &n, &numbers);
+        transformar(numbers, m, n, &a, &b);
+
+        // Ejecutar multiplicación según opción
+        if (strcmp(argv[1], "-T") == 0){
+            result = traditional_mult(a , b, &E_cpu);
+        } else if (strcmp(argv[1], "-R") == 0){
+            result = russian_secuential(a , b, &E_cpu);
+        } else {
+            Usage(argv[0]);
+            return EXIT_FAILURE;
+        }
+
+        finish = clock();  // fin de wall time
+        wall_time = (float)(finish - start) / CLOCKS_PER_SEC;
+
+        // Mostrar resultados
         if (mode == VERBOSE)
             print_data(numbers, m, n);
 
-        if (strcmp(argv[1], "-T") == 0){
+        printf("\nMultiplication result: %llu\n", result);
+        printf("CPU time: %f\n", E_cpu);
+        printf("Wall time: %f\n", wall_time);
 
-            result = traditional_mult(a , b, &E_cpu);
-
-            printf("\nMultiplicate result: %llu\n", result);
-            printf("\nCPU time: %f\n", E_cpu);
-            printf("\nWall time: %f\n", wall_time);
-        }
-
-        if (strcmp(argv[1], "-R") == 0){
-
-            start = clock(); // cpu start
-            result = russian_secuential(a, b, &E_cpu);
-            finish = clock(); // cpu exit
-
-            E_cpu = (float)(finish - start) / CLOCKS_PER_SEC;
-
-            printf ("\nMultiplicate result: %llu\n", result);
-            printf("\nCPU time: %f\n", E_cpu);
-            printf("\nWall time: %f\n", wall_time);
-        }
-
+        // Liberar memoria
         free(numbers[0]);
         free(numbers[1]);
         free(numbers);
 
-    }
-    else{
-
+    } else {
         Usage(argv[0]);
+        return EXIT_FAILURE;
     }
-
 }
