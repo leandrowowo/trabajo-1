@@ -71,15 +71,19 @@ void transformation(int **numbers, int m, int n, unsigned int *num1, unsigned in
     }
 }
 
-unsigned long long traditional_mult(unsigned int a, unsigned int b, float *CPUtime)
+unsigned long long Process(unsigned int a, unsigned int b, float *CPU_time, long *Wall_time)
 {
     unsigned int digit;
-    unsigned long long partial_result;
-    unsigned long long result = 0;
-    unsigned long long factor = 1; // Equivale a las potencias de 10 al momento de multiplicar y correrse un espacio
-    clock_t start, finish; // Tiempos de CPU
+    unsigned long long partial_result, result;
+    unsigned long long factor; // Equivale a las potencias de 10 al momento de multiplicar y correrse un espacio
+    clock_t CPU_start, CPU_finish; // Tiempos de CPU
+    time_t wall_start, wall_finish; // Tiempos de Wall
 
-    start = clock();
+    result = 0;
+    factor = 1;
+
+    wall_start = time(NULL);
+    CPU_start = clock();
     while(b > 0)
     {
         digit = b % 10;     // Toma el último dígito del segundo factor
@@ -88,9 +92,11 @@ unsigned long long traditional_mult(unsigned int a, unsigned int b, float *CPUti
         b = b / 10;     // Divide por 10 para tomar el siguiente digito a multiplicar en la próxima iteración
         factor = factor * 10;
     }
-    finish = clock();
+    CPU_finish = clock();
+    wall_finish = time(NULL);
 
-    *CPUtime = (float)(finish - start)/CLOCKS_PER_SEC; 
+    *Wall_time = (long)(wall_finish - wall_start); // Cálculo de tiempo de procesos (Wall time)
+    *CPU_time = (float)(CPU_finish - CPU_start) / CLOCKS_PER_SEC; // Cálculo de tiempo de CPU
 
     return result;
 }
@@ -100,25 +106,21 @@ void printData(int mode)
     int m, n, **numbers, i, j;
     unsigned int a, b;
     unsigned long long resultado;
-    clock_t start, finish;
-    float CPU_time, wall_time;
+    float CPU_time;
+    long Wall_time;
 
-    start = clock();
     read_data(&m, &n, &numbers);
 
     transformation(numbers, m, n, &a, &b);
 
-    resultado = traditional_mult(a, b, &CPU_time);
-    finish = clock();
-
-    wall_time = (float)(finish - start)/CLOCKS_PER_SEC; // Cálculo de tiempo de procesos (Wall time)
+    resultado = Process(a, b, &CPU_time, &Wall_time);
 
     if(mode == SILENT)
     {
         printf("Número de dígitos primer valor: %d\n", m);
         printf("Número de dígitos segundo valor: %d\n", n);
         printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
-        printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+        printf("Tiempo de ejecución total (segundos): %f\n", Wall_time);
     }
     else if(mode == VERBOSE)
     {
@@ -139,7 +141,7 @@ void printData(int mode)
 
         printf("Resultado: %llu\n", resultado);
         printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
-        printf("Tiempo de ejecución total (segundos): %f\n", wall_time);
+        printf("Tiempo de ejecución total (segundos): %f\n", Wall_time);
     }
 
     // Liberación de memoria

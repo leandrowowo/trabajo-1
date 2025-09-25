@@ -16,10 +16,22 @@
 #include <pthread.h>
 
 /*
-    VARIABLES GLOBALES
+    DEFINE
 */
 #define SILENT 0
 #define VERBOSE 1
+
+/*
+    STRUCT
+*/
+struct Message
+{
+    int myid, ndigits, size, opmode;
+    unsigned long long partial_result;
+};
+
+unsigned long long result;
+unsigned int a, factor;
 
 /*
     FUNCIONES
@@ -53,21 +65,36 @@ void read_data(int *m, int *n, int ***numbers)
     }
 }
 
-void transformation(int **numbers, int m, int n, unsigned int *num1, unsigned int *num2)
+void transformation(int **numbers, int m, unsigned int *num1)
 {
     int i, j;
 
     *num1 = 0;
-    *num2 = 0;
 
     for(i = 0; i < m; i = i + 1)
     {
         *num1 = (*num1 * 10) + numbers[0][i];
     }
+}
 
-    for(j = 0; j < n; j = j + 1)
+void Process(void *p)
+{
+    int i, j, k;
+    int m; // Cantidad de dígitos del primer valor
+    int **numbers; // Arreglo bidimensional
+    struct Message *me;
+
+    me = (struct Message *) p;
+
+    read_data(&m ,&(me->ndigits), &numbers); // Lectura de archivo
+    transformation(numbers, m, &a); // Transformación del primer valor de entrada de arreglo con dígitos a número entero
+
+    if(me->opmode == SILENT)
     {
-        *num2 = (*num2 * 10) + numbers[1][j];
+        printf("***************************\n");
+        printf("Cantidad de dígitos primer valor: %d", m);
+        printf("Cantidad de dígitos segundo valor: %d", me->ndigits);
+
     }
 }
 
