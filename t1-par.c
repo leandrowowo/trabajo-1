@@ -27,11 +27,14 @@
 #define VERBOSE     3
 
 //trabajaremos con a y b que son los valores que obtienen el valor del arreglo.
+//m es la cantidad de digitos del número y así se sabe cuando se debe recorrer el arreglo numbers[0][i]
+//lo mismo con n pero para el segundo dígito con numbers[1][i]
 struct Message{
-    int myid, size, opmode, avalue, bvalue;
+    int myid, size, opmode, opmethod, avalue, bvalue, partialresult;
 };
 
 
+//variable global
 unsigned int **numbers;
 
 
@@ -39,74 +42,106 @@ unsigned int **numbers;
 *
 *
 */
-//void Process(void *p){
+
+/*
+void Process(void *p){
+
+    struct Message *me; 
+    if(me-> opmode == TRADITIONAL){
+
+        
+
+    }
+
+    Hacerlo de manera secuencial parecido al BUSY WAITING
+    (!) preguntarle a schiaffino 
+    if(me->opmode == RUSSIAN){
+        if (me->)
+        
 
 
+    }
 
-
-
-//}
-
+}
+/*
 
 
 /*
 *
 *
 */
-void read_data(int m, int n) {
+void read_data(unsigned int *m, unsigned int *n) {
     int i;
 
-    // Leer el numero M indicando cantidad de digitos
-    if (scanf("%d", &m) != 1) { //Si es diferente de un entero
-        printf("\n Error: no se pudo leer el valor de m.\n");
+    // Leer el numero M indicando cantidad de dígitos
+    if (scanf("%u", m) != 1) {
+        printf("\nError: no se pudo leer el valor de m.\n");
         exit(EXIT_FAILURE);
     }
 
-    numbers = calloc(2, sizeof(unsigned int *)); //asignar memoria para dos filas
-    (numbers)[0] = calloc(m, sizeof(unsigned int)); //asignar memoria para "m" columnas de la fila 0
+    numbers = calloc(2, sizeof(unsigned int *));   // 2 filas
+    numbers[0] = calloc(*m, sizeof(unsigned int)); // fila 0 con m columnas
 
-    // Leer dígitos del primer número y verificar que exista esa cantidad
-    for (i = 0; i < m; i = i + 1) {
-        if (scanf("%d", &(numbers)[0][i]) != 1) {
-            printf("\n Error: faltan dígitos en la primera fila (se esperaban %d).\n", m);
+    for (i = 0; i < *m; i++) {
+        if (scanf("%u", &numbers[0][i]) != 1) {
+            printf("\nError: faltan dígitos en la primera fila (se esperaban %u).\n", *m);
             exit(EXIT_FAILURE);
         }
     }
 
-    // Leer el numero N indicando cantidad de digitos
-    if (scanf("%d", &n) != 1) {
+    // Leer el numero N indicando cantidad de dígitos
+    if (scanf("%u", n) != 1) {
         printf("\nError: no se pudo leer el valor de n.\n");
         exit(EXIT_FAILURE);
     }
 
-    (numbers)[1] = calloc(n, sizeof(unsigned int));
+    numbers[1] = calloc(*n, sizeof(unsigned int)); // fila 1 con n columnas
 
-    // Leer dígitos del segundo número y verificar que haya "n" digitos
-    for (i = 0; i < n; i = i + 1) {
-        if (scanf("%u", &(numbers)[1][i]) != 1) {
-            printf("\nError: faltan dígitos en el segundo número (se esperaban %u).\n", n);
+    for (i = 0; i < *n; i++) {
+        if (scanf("%u", &numbers[1][i]) != 1) {
+            printf("\nError: faltan dígitos en el segundo número (se esperaban %u).\n", *n);
             exit(EXIT_FAILURE);
         }
     }
-
-    //Agregado al final para mostrar lo leído
-    printf("\n--- Datos leídos ---\n");
-    printf("Cantidad de dígitos primer número (m): %d\n", m);
-    printf("Primer número (dígitos): ");
-    for (i = 0; i < m; i++) {
-        printf("%u ", numbers[0][i]);
-    }
-    printf("\n");
-
-    printf("Cantidad de dígitos segundo número (n): %d\n", n);
-    printf("Segundo número (dígitos): ");
-    for (i = 0; i < n; i++) {
-        printf("%u ", numbers[1][i]);
-    }
-    printf("\n---------------------\n");
-
 }
 
+/*
+*
+*
+*/
+//transformar los digitos del arreglo a numero entero
+void transformar(unsigned int m, unsigned int n, unsigned long long int *num1, unsigned long long int *num2){
+    int i;
+    *num1 = 0;
+    *num2 = 0;
+
+    for(i = 0; i < m; i = i + 1)
+        *num1 = *num1*10 + numbers[0][i]; // transformar la fila 0 en un número entero
+
+    for(i = 0; i < n; i = i + 1 )
+        *num2 = *num2*10 + numbers[1][i]; // transformar la fila 1
+}
+
+/*
+*
+*
+*/
+void print_data(unsigned int m, unsigned int n){
+    int i;
+
+    printf("****** Archivo utilizado ******\n");
+    printf("%u\n", m);                 //cantidad de digitos para m
+    for (i = 0; i < m; i = i + 1)
+    {
+        printf("%u\n", numbers[0][i]);  //imprimir digitos para la fila 0
+    }
+    printf("%u\n", m);                 //cantidad de digitos para n
+    for (i = 0; i < m; i = i + 1)
+    {
+        printf("%u\n", numbers[1][i]);  // imprimir digitos par la fila 1
+    }
+    
+}
 
 /*
 *
@@ -127,27 +162,74 @@ void Usage(char *message) {
 */
 int main(int argc, char **argv){
 
-    int mode, method, k, m, n;
+    unsigned int m,n;
+    int mode, method, k, s, rem, l, i;
+    unsigned long long int a, b;
     struct Message **me;
     pthread_t *thread;
     pthread_attr_t attribute;
+    void *exit_status;
+
+
 
     //entrada es ./a.exe k -M -O < datafile.txt
     if(argc == 4){
+        if(strcmp(argv[2], "-T") == 0)
+            method = TRADITIONAL;
+        if(strcmp(argv[2], "-R") == 0)
+            method = RUSSIAN;
+
         if(strcmp(argv[3], "-S") == 0)
             mode = SILENT;
         if(strcmp(argv[3], "-V") == 0)
             mode = VERBOSE;
 
         k = atoi(argv[1]);  //Obtener cantidad de hebras
-        read_data(m, n);
+        read_data(&m, &n);
+        transformar(m,n, &a, &b);
         
+        if(mode == VERBOSE)
+            print_data(m,n);
+        
+        thread = calloc(k, sizeof(pthread_t));
 
+        me = calloc(k, sizeof(struct Message *));
 
-        if(strcmp(argv[2], "-T") == 0)
-            method = TRADITIONAL;
-        if(strcmp(argv[2], "-R") == 0)
-            method = RUSSIAN;
+        for (i = 0; i < k; i = i + 1){
+            me[i] = calloc(1, sizeof(struct Message))
+        }
+        pthread_attr_init(&attribute);
+        pthread_attr_setdetachstate(&attribute,PTHREAD_CREATE_JOINABLE);
+    
+        s = a / k; //a es el numero que detiene la multiplicacion rusa
+        rem = a % k;
+        l = 0;
+
+        //int myid, size, opmode, method, avalue, bvalue, partialresult;
+        for(mode == VERBOSE){
+            if (mode == VERBOSE)
+                printf("Main: creating thread %d\n", i);
+            m[i]->myid = i;
+	    if (rem != 0) {
+	        m[i]->size = s + 1;
+	        rem = rem - 1;
+	    }
+	    else
+	        m[i]->size = s;
+        m[i]->opmode = mode;
+        m[i]->opmethod = method;
+        m[i]->avalue = a;
+        m[i]->bvalue = b;
+        m[i]->partialresult = 0;
+        l = l + m[i]->size;
+        pthread_create(&thread[i],&attribute,Process,(void *) m[i]);
+        }
+
+        pthread_attr_destroy(&attribute);
+
+        for (i = 0; i < k; i = i + 1){
+            pthread_join(thread[i],&exit_status);
+        }
 
     } else {
         Usage(argv[0]);
