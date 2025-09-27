@@ -70,24 +70,54 @@ void read_data(int *m, int *n, int ***numbers)
 
 void russian(int **numbers, int m, int n) {
 
-    int i, carry, prod;
+    int i, k; //Indices y contadores de los bucles
+    int carryA, carryB, carry_sum; // Varuiables para el acarreo 
+    int prod, temp, actual, sum; //Variables auxiliares para las operaciones
+
     int *a = numbers[0]; // fila 0
     int *b = numbers[1]; // fila 1
-    int size = m;
+
+    int size = m; //Tamaño del arreglo A y luego ir reduciendo si hay 0
+
+    //Arreglo para almacenar el resultado si A es impar
+    int max_size = m + n; //Cantidad máxima de dígitos del resultado
+    int *result = (int *)calloc(max_size, sizeof(int));
+
 
     // Mientras el número no sea 1
-    while (!(size == 1 && a[0] == 1)) {
+    while (!(size == 1 && a[0] == 0)) {
 
-        carry = 0;
+        carryA = 0; //Se reinicia el carry de A
+        carryB = 0; //Se reinicia el carry de B
+
+        if(a[size - 1] % 2 != 0){
+            
+            carry_sum = 0;  // Reiniciar carry para la suma
+            k = max_size - n;
+
+            for (i = n - 1; i >= 0; i = i - 1) {
+                sum = result[k + i] + b[i] + carry_sum;
+                result[k + i] = sum % 10;
+                carry_sum = sum / 10;
+            }
+
+            // Propagar carry si sobra
+            while(carry_sum > 0 && k > 0){
+                k = k - 1;
+                sum = result[k] + carry_sum;
+                result[k] = sum % 10;
+                carry_sum = sum / 10;
+            }
+        }
 
         /*
         *
         */
         //Dividir el arreglo A
         for (i = 0; i < size; i = i + 1) {
-            int actual = carry * 10 + a[i];
+            actual = carryA * 10 + a[i];
             a[i] = actual / 2;
-            carry = actual % 2;
+            carryA = actual % 2;
         }
 
         // Eliminar ceros a la izquierda
@@ -101,21 +131,79 @@ void russian(int **numbers, int m, int n) {
         *
         */
         //Multiplicar arreglo B
+        // Recorremos de derecha a izquierda
+        for(i = n - 1; i >= 0; i = i - 1)
+        {
+            temp = b[i] * 2 + carryB;
+            b[i] = temp % 10;
+            carryB = temp / 10;
+        }
+
+        // Si después de procesar todos los dígitos aún queda un acarreo
+        if(carryB > 0)
+        {
+            // Desplazamos a la derecha
+            for(i = n; i > 0; i = i - 1)
+            {
+                b[i] = b[i-1];
+            }
+            b[0] = carryB;
+            n = n + 1; // Aumentamos la longitud del número
+        }
         /*
         *
         */
-        
+       /*
 
-        //CONDICION DE SI ULTIMO DIGITO DE A ES IMPAR, ENTONCES SUMAR B AL RESULTADO
-
-        // Imprimir el resultado de esta división
-        printf("Después de dividir entre 2:");
-        for (i = 0; i < size; i = i + 1) {
+        // Debug: mostrar paso
+        printf("A: ");
+        for (i = 0; i < size; i = i + 1) 
             printf("%d", a[i]);
-        }
-        printf("\n");
+
+        printf(" | B: ");
+        for (i = 0; i < n; i = i + 1) 
+            printf("%d", b[i]);
+
+        printf("\tResult: ");
+        for (i = 0; i < max_size; i = i + 1) 
+            printf("%d", result[i]);
+        printf("\n\n");
+        */
     }
 
+    if (a[0] == 1) {
+
+        carry_sum = 0;
+        k = max_size - n;
+
+        for (i = n - 1; i >= 0; i = i - 1) {
+            sum = result[k + i] + b[i] + carry_sum;
+            result[k + i] = sum % 10;
+            carry_sum = sum / 10;
+        }
+        while(carry_sum > 0 && k > 0) {
+            sum = result[k] + carry_sum;
+            result[k] = sum % 10;
+            carry_sum = sum / 10;
+            k = k - 1;
+        }
+    }
+    
+    // Eliminar ceros a la izquierda
+    while (max_size > 1 && result[0] == 0) {
+        for (i = 0; i < max_size - 1; i = i + 1) {
+            result[i] = result[i + 1];
+        }
+        max_size = max_size - 1;
+    }
+
+    printf("\tResult: ");
+    for (i = 0; i < max_size; i = i + 1) 
+        printf("%d", result[i]);
+    printf("\n\n");
+    
+
+    free(result);
 }
 
 
