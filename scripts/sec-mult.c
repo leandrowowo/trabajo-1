@@ -55,7 +55,6 @@ void read_data(int *m, int *n, int ***numbers)
 int *Process(int **numbers, int m, int n, int *result_size, float *CPU_time, long *Wall_time)
 {
     int *a, *b, *result, i, j;
-    int *factor; // Arreglo que guarda las potencias de 10 correspondientes a las unidades decimales de a o b
     clock_t CPU_start, CPU_finish; // Tiempos de CPU
     time_t wall_start, wall_finish; // Tiempos de Wall
 
