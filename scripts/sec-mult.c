@@ -52,46 +52,52 @@ void read_data(int *m, int *n, int ***numbers)
     }
 }
 
-
-void transformation(int **numbers, int m, int n, unsigned int *num1, unsigned int *num2)
+int *Process(int **numbers, int m, int n, int *result_size, float *CPU_time, long *Wall_time)
 {
-    int i, j;
-
-    *num1 = 0;
-    *num2 = 0;
-
-    for(i = 0; i < m; i = i + 1)
-    {
-        *num1 = (*num1 * 10) + numbers[0][i];
-    }
-
-    for(j = 0; j < n; j = j + 1)
-    {
-        *num2 = (*num2 * 10) + numbers[1][j];
-    }
-}
-
-unsigned long long Process(unsigned int a, unsigned int b, float *CPU_time, long *Wall_time)
-{
-    unsigned int digit;
-    unsigned long long partial_result, result;
-    unsigned long long factor; // Equivale a las potencias de 10 al momento de multiplicar y correrse un espacio
+    int *a, *b, *result, i, j;
+    int *factor; // Arreglo que guarda las potencias de 10 correspondientes a las unidades decimales de a o b
     clock_t CPU_start, CPU_finish; // Tiempos de CPU
     time_t wall_start, wall_finish; // Tiempos de Wall
 
-    result = 0;
-    factor = 1;
+    a = numbers[0];
+    b = numbers[1];
+
+    *result_size = m + n; // Cantidad máxima de dígitos del resultado de la multiplicación
+    result = (int *)calloc(*result_size, sizeof(int));
 
     wall_start = time(NULL);
     CPU_start = clock();
-    while(b > 0)
+    
+    // Proceso de multiplicación
+    for(i = n - 1; i >= 0; i = i - 1)
     {
-        digit = b % 10;     // Toma el último dígito del segundo factor
-        partial_result = (unsigned long long)a * digit;     // 'a' se convierte a unsigned long long para evitar overflow en la multiplicación
-        result = result + partial_result * factor;
-        b = b / 10;     // Divide por 10 para tomar el siguiente digito a multiplicar en la próxima iteración
-        factor = factor * 10;
+        for(j = m - 1; j >= 0; j = j - 1)
+        {
+            result[i+j+1] = result[i+j+1] + a[j] * b[i];
+        }
     }
+
+    // Proceso de acarreo
+    for(i = *result_size; i > 0; i = i - 1)
+    {
+        if(result[i] >= 10)
+        {
+            result[i-1] = result[i-1] + result[i]/10;
+            result[i] = result[i] % 10;
+        }
+    }
+
+    // Si el primer dígito de result es 0, se elimina del arreglo
+    if(result[0] == 0)
+    {
+        for(i = 0; i < *result_size; i = i + 1)
+        {
+            result[i] = result[i+1];
+        }
+
+        *result_size = *result_size - 1;
+    }
+
     CPU_finish = clock();
     wall_finish = time(NULL);
 
@@ -104,16 +110,13 @@ unsigned long long Process(unsigned int a, unsigned int b, float *CPU_time, long
 void printData(int mode)
 {
     int m, n, **numbers, i, j;
-    unsigned int a, b;
-    unsigned long long resultado;
+    int a, b, *resultado, resultado_size;
     float CPU_time;
     long Wall_time;
 
     read_data(&m, &n, &numbers);
 
-    transformation(numbers, m, n, &a, &b);
-
-    resultado = Process(a, b, &CPU_time, &Wall_time);
+    resultado = Process(numbers, m, n, &resultado_size, &CPU_time, &Wall_time);
 
     if(mode == SILENT)
     {
@@ -139,8 +142,13 @@ void printData(int mode)
             printf("%d\n", numbers[1][j]); // Imprime los dígitos del segundo valor
         }
 
-        printf("Resultado: %llu\n", resultado);
-        printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
+        printf("Resultado: ");
+        for (i = 0; i < resultado_size; i = i + 1)
+        {
+            printf("%d", resultado[i]);
+        }
+        
+        printf("\nTiempo de ejecución CPU (segundos): %f\n", CPU_time);
         printf("Tiempo de ejecución total (segundos): %f\n", Wall_time);
     }
 
