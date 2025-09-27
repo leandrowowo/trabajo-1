@@ -39,40 +39,26 @@ void Usage(char *message) {
 *
 *
 */
-void read_data(unsigned int *m, unsigned int *n, unsigned int ***numbers) {
-    int i;
+void read_data(int *m, int *n, int ***numbers)
+{
+    int i, j;
 
-    // Leer el numero M indicando cantidad de digitos
-    if (scanf("%u", m) != 1) { //Si es diferente de un entero
-        printf("\n Error: no se pudo leer el valor de m.\n");
-        exit(EXIT_FAILURE);
+    *numbers = (int **)calloc(2, sizeof(int *)); // Memoria para dos filas
+
+    scanf("%d", m); // Cantidad de dígitos del primer número
+    (*numbers)[0] = (int *)calloc(*m, sizeof(int)); // Asignamos memoria para la primera fila cantidad M
+
+    for(i = 0; i < *m; i = i + 1)
+    {
+        scanf("%d", &(*numbers)[0][i]); //Asignamos los valores a la primera fila
     }
 
-    *numbers = calloc(2, sizeof(unsigned int *)); //asignar memoria para dos filas
-    (*numbers)[0] = calloc(*m, sizeof(unsigned int)); //asignar memoria para "m" columnas de la fila 0
+    scanf("%d", n); // Cantidad de dígitos del segundo número
+    (*numbers)[1] = (int *)calloc(*n, sizeof(int)); // Asignamos memoria para la segunda fila cantidad N
 
-    // Leer dígitos del primer número y verificar que exista esa cantidad
-    for (i = 0; i < *m; i = i + 1) {
-        if (scanf("%u", &(*numbers)[0][i]) != 1) {
-            printf("\n Error: faltan dígitos en la primera fila (se esperaban %u).\n", *m);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    // Leer el numero N indicando cantidad de digitos
-    if (scanf("%u", n) != 1) {
-        printf("\nError: no se pudo leer el valor de n.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    (*numbers)[1] = calloc(*n, sizeof(unsigned int));
-
-    // Leer dígitos del segundo número y verificar que haya "n" digitos
-    for (i = 0; i < *n; i = i + 1) {
-        if (scanf("%u", &(*numbers)[1][i]) != 1) {
-            printf("\nError: faltan dígitos en el segundo número (se esperaban %u).\n", *n);
-            exit(EXIT_FAILURE);
-        }
+    for(j = 0; j < *n; j = j + 1)
+    {
+        scanf("%d", &(*numbers)[1][j]); //Asignamos los valores a la segunda fila
     }
 }
 
@@ -81,29 +67,70 @@ void read_data(unsigned int *m, unsigned int *n, unsigned int ***numbers) {
 *
 *
 */
-//transformar los digitos del arreglo a numero entero
-void transformar(unsigned int **numbers, unsigned int m, unsigned int n, unsigned long long int *num1, unsigned long long int *num2){
-     int i;
-    *num1 = 0;
-    *num2 = 0;
 
-    for(i = 0; i < m; i = i + 1)
-        *num1 = *num1*10 + numbers[0][i]; // transformar la fila 0 en un número entero
+void russian(int **numbers, int m, int n) {
 
-    for(i = 0; i < n; i = i + 1 )
-        *num2 = *num2*10 + numbers[1][i]; // transformar la fila 1
+    int i, carry, prod;
+    int *a = numbers[0]; // fila 0
+    int *b = numbers[1]; // fila 1
+    int size = m;
+
+    // Mientras el número no sea 1
+    while (!(size == 1 && a[0] == 1)) {
+
+        carry = 0;
+
+        /*
+        *
+        */
+        //Dividir el arreglo A
+        for (i = 0; i < size; i = i + 1) {
+            int actual = carry * 10 + a[i];
+            a[i] = actual / 2;
+            carry = actual % 2;
+        }
+
+        // Eliminar ceros a la izquierda
+        while (size > 1 && a[0] == 0) {
+            for (i = 0; i < size - 1; i = i + 1) {
+                a[i] = a[i + 1];
+            }
+            size = size - 1;
+        }
+        /*
+        *
+        */
+        //Multiplicar arreglo B
+        /*
+        *
+        */
+        
+
+        //CONDICION DE SI ULTIMO DIGITO DE A ES IMPAR, ENTONCES SUMAR B AL RESULTADO
+
+        // Imprimir el resultado de esta división
+        printf("Después de dividir entre 2:");
+        for (i = 0; i < size; i = i + 1) {
+            printf("%d", a[i]);
+        }
+        printf("\n");
+    }
+
 }
 
 
 /*
-*
-*
-*/
 //funcion con el metodo de multiplicacion rusa
-int russian_secuential(unsigned long long int a, unsigned long long b, float *E_cpu){
+void russian_secuential(unsigned long long int a, unsigned long long b){
 
     unsigned long long int multiply = 0;
+    long E_wall;
+    float E_cpu;
     clock_t start, finish; // Tiempos de CPU
+    time_t  ts, te;
+
+    ts = time(NULL);
+    start = clock();
 
     start = clock();
     while (a >= 1 && b > 0) {
@@ -114,10 +141,15 @@ int russian_secuential(unsigned long long int a, unsigned long long b, float *E_
         b = b * 2; // Multiplicar b por 2
     }
     finish = clock();
+    te = time(NULL);
 
-    *E_cpu = (float)(finish - start)/CLOCKS_PER_SEC; 
+    E_wall = (long) (te - ts);
+    E_cpu = (float)(finish - start)/CLOCKS_PER_SEC;
 
-    return multiply;
+    printf("\nMultiplication result: %llu\n", multiply);
+    printf("CPU time: %f\n", E_cpu);
+    printf("Wall time: %f\n", E_wall);
+
 }
 
 
@@ -126,12 +158,17 @@ int russian_secuential(unsigned long long int a, unsigned long long b, float *E_
 *
 */
 //funcion de multiplicacion tradicional
-unsigned long long traditional_mult(unsigned long long int a, unsigned long long int b, float *E_cpu)
+/*
+void traditional_mult(unsigned long long int a, unsigned long long int b)
 {
     unsigned int digit;
+    long E_wall;
+    float E_cpu;
     unsigned long long partial_result ,valor = 0, factor = 1;              // Equivale a las potencias de 10 al momento de multiplicar y correrse un espacio
     clock_t start, finish; // Tiempos de CPU
+    time_t  ts, te;
 
+    ts = time(NULL);
     start = clock();
     while(b > 0)
     {
@@ -143,10 +180,14 @@ unsigned long long traditional_mult(unsigned long long int a, unsigned long long
         
     }
     finish = clock();
+    te = time(NULL);
 
-    *E_cpu = (float)(finish - start)/CLOCKS_PER_SEC; 
+    E_wall = (long) (te - ts);
+    E_cpu = (float)(finish - start)/CLOCKS_PER_SEC;
 
-    return valor;
+    printf("\nMultiplication result: %llu\n", valor);
+    printf("CPU time: %f\n", E_cpu);
+    printf("Wall time: %f\n", E_wall);
 }
 
 
@@ -154,6 +195,7 @@ unsigned long long traditional_mult(unsigned long long int a, unsigned long long
 *
 *
 */
+/*
 void print_data(unsigned int **numbers, unsigned int m, unsigned int n){
     int i;
 
@@ -177,11 +219,8 @@ void print_data(unsigned int **numbers, unsigned int m, unsigned int n){
  */
 int main (int argc, char **argv){
 
-    unsigned int m,n, **numbers;           //numero de columnas y el arreglo bidimensional
-    unsigned long long int a, b, result;   // resultado de la multiplicación
+    int m,n, **numbers;           //numero de columnas y el arreglo bidimensional
     int mode;
-    float E_cpu, wall_time;
-    clock_t start, finish;
 
     if (argc == 3){
 
@@ -195,31 +234,23 @@ int main (int argc, char **argv){
             return EXIT_FAILURE;
         }
 
-        start = clock();   // inicia medición de wall time
-
         read_data(&m, &n, &numbers);
-        transformar(numbers, m, n, &a, &b);
+
+        
+        // Mostrar resultados
+        if (mode == VERBOSE){
+            //print_data(numbers, m, n);
+        }
 
         // Ejecutar multiplicación según opción
         if (strcmp(argv[1], "-T") == 0){
-            result = traditional_mult(a , b, &E_cpu);
+            //traditional_mult(a , b);
         } else if (strcmp(argv[1], "-R") == 0){
-            result = russian_secuential(a , b, &E_cpu);
+            russian(numbers, m, n);
         } else {
             Usage(argv[0]);
             return EXIT_FAILURE;
         }
-
-        finish = clock();  // fin de wall time
-        wall_time = (float)(finish - start) / CLOCKS_PER_SEC;
-
-        // Mostrar resultados
-        if (mode == VERBOSE)
-            print_data(numbers, m, n);
-
-        printf("\nMultiplication result: %llu\n", result);
-        printf("CPU time: %f\n", E_cpu);
-        printf("Wall time: %f\n", wall_time);
 
         // Liberar memoria
         free(numbers[0]);
