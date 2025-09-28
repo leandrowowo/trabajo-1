@@ -30,96 +30,80 @@
 //m es la cantidad de digitos del número y así se sabe cuando se debe recorrer el arreglo numbers[0][i]
 //lo mismo con n pero para el segundo dígito con numbers[1][i]
 struct Message{
-    int myid, size, opmode, opmethod, avalue, bvalue, partialresult;
+    int myid,   //ID del hilo
+    size,       //Tamaño del hilo
+    opmode,     //modo de operación(Verbose o Silent)
+    opmethod,   //método de operación(Tradicional o Ruso)
+    size_a,     //tamaño del arreglo a
+    carryA,     //acarreo del arreglo a
+    remainder;  //resto de la división entre 2 del arreglo a
 };
 
 
 //variable global
-unsigned int **numbers;
+int **numbers; //arreglo bidimensional donde esta el datafile
+int *a; //arreglo para el primer número y segundo numero
 
-
-/*
-*
-*
-*/
-
-/*
-void Process(void *p){
-
-    struct Message *me; 
-    if(me-> opmode == TRADITIONAL){
-
-        
-
-    }
-
-    Hacerlo de manera secuencial parecido al BUSY WAITING
-    (!) preguntarle a schiaffino 
-    if(me->opmode == RUSSIAN){
-        if (me->)
-        
-
-
-    }
-
-}
-/*
 
 
 /*
 *
 *
 */
-void read_data(unsigned int *m, unsigned int *n) {
-    int i;
 
-    // Leer el numero M indicando cantidad de dígitos
-    if (scanf("%u", m) != 1) {
-        printf("\nError: no se pudo leer el valor de m.\n");
-        exit(EXIT_FAILURE);
-    }
+void *Process(void *p) {
+    struct Message *me = (struct Message *)p;
+    int i, actual;
 
-    numbers = calloc(2, sizeof(unsigned int *));   // 2 filas
-    numbers[0] = calloc(*m, sizeof(unsigned int)); // fila 0 con m columnas
+    if(me->opmethod == RUSSIAN) {
 
-    for (i = 0; i < *m; i++) {
-        if (scanf("%u", &numbers[0][i]) != 1) {
-            printf("\nError: faltan dígitos en la primera fila (se esperaban %u).\n", *m);
-            exit(EXIT_FAILURE);
+        //DIVISIÓN ENTRE 2 DEL ARREGLO A
+        if(me->opmode == VERBOSE) {
+            printf("\n\n**************************************\n");
+            printf("Hilo %d: comenzando la división de todo el arreglo (size = %d)\n", me->myid, me->size_a);
         }
-    }
 
-    // Leer el numero N indicando cantidad de dígitos
-    if (scanf("%u", n) != 1) {
-        printf("\nError: no se pudo leer el valor de n.\n");
-        exit(EXIT_FAILURE);
-    }
+        me->carryA = 0;  // carry inicial
+        for(i = 0; i < me->size_a; i = i + 1) {
+            actual = me->carryA * 10 + a[i];
+            a[i] = actual / 2;
+            me->carryA = actual % 2;
 
-    numbers[1] = calloc(*n, sizeof(unsigned int)); // fila 1 con n columnas
-
-    for (i = 0; i < *n; i++) {
-        if (scanf("%u", &numbers[1][i]) != 1) {
-            printf("\nError: faltan dígitos en el segundo número (se esperaban %u).\n", *n);
-            exit(EXIT_FAILURE);
+            if(me->opmode == VERBOSE)
+                printf("Hilo %d, a[%d] = %d, carry = %d\n", me->myid, i, a[i], me->carryA);
         }
+
+        if(me->opmode == VERBOSE)
+            printf("Hilo %d terminó con carry = %d\n", me->myid, me->carryA);
     }
+
+    pthread_exit(NULL);
 }
 
+
 /*
 *
 *
 */
-//transformar los digitos del arreglo a numero entero
-void transformar(unsigned int m, unsigned int n, unsigned long long int *num1, unsigned long long int *num2){
-    int i;
-    *num1 = 0;
-    *num2 = 0;
+void read_data(int *m, int *n)
+{
+    int i, j;
 
-    for(i = 0; i < m; i = i + 1)
-        *num1 = *num1*10 + numbers[0][i]; // transformar la fila 0 en un número entero
+    numbers = (int **)calloc(2, sizeof(int *)); // Memoria para dos filas
 
-    for(i = 0; i < n; i = i + 1 )
-        *num2 = *num2*10 + numbers[1][i]; // transformar la fila 1
+    scanf("%d", m); // Cantidad de dígitos del primer número
+    numbers[0] = (int *)calloc(*m, sizeof(int)); // Asignamos memoria para la primera fila cantidad M
+
+    for(i = 0; i < *m; i = i + 1){
+        scanf("%d", &(numbers)[0][i]); //Asignamos los valores a la primera fila
+    }
+
+    scanf("%d", n); // Cantidad de dígitos del segundo número
+    numbers[1] = (int *)calloc(*n, sizeof(int)); // Asignamos memoria para la segunda fila cantidad N
+
+    for(j = 0; j < *n; j = j + 1){
+        scanf("%d", &(numbers)[1][j]); //Asignamos los valores a la segunda fila
+    }
 }
 
 /*
@@ -163,8 +147,7 @@ void Usage(char *message) {
 int main(int argc, char **argv){
 
     unsigned int m,n;
-    int mode, method, k, s, rem, l, i;
-    unsigned long long int a, b;
+    int mode, method, k, s, rem, i;
     struct Message **me;
     pthread_t *thread;
     pthread_attr_t attribute;
@@ -186,43 +169,46 @@ int main(int argc, char **argv){
 
         k = atoi(argv[1]);  //Obtener cantidad de hebras
         read_data(&m, &n);
-        transformar(m,n, &a, &b);
         
         if(mode == VERBOSE)
             print_data(m,n);
         
         thread = calloc(k, sizeof(pthread_t));
 
+        a = (int *)calloc(m, sizeof(int));
+        for (i = 0; i < m; i = i + 1){
+            a[i] = numbers[0][i]; // primer numero
+        }
+        
         me = calloc(k, sizeof(struct Message *));
 
         for (i = 0; i < k; i = i + 1){
-            me[i] = calloc(1, sizeof(struct Message))
+            me[i] = calloc(1, sizeof(struct Message));
         }
         pthread_attr_init(&attribute);
         pthread_attr_setdetachstate(&attribute,PTHREAD_CREATE_JOINABLE);
-    
-        s = a / k; //a es el numero que detiene la multiplicacion rusa
-        rem = a % k;
-        l = 0;
+        
+        s = m / k;
+        rem = m % k;
 
-        //int myid, size, opmode, method, avalue, bvalue, partialresult;
-        for(mode == VERBOSE){
-            if (mode == VERBOSE)
+        // DEFINIR LOS DATOS PARA EL LOS HILOS
+        for(i = 0; i < k; i = i + 1){
+            if(mode == VERBOSE)
                 printf("Main: creating thread %d\n", i);
-            m[i]->myid = i;
-	    if (rem != 0) {
-	        m[i]->size = s + 1;
-	        rem = rem - 1;
-	    }
-	    else
-	        m[i]->size = s;
-        m[i]->opmode = mode;
-        m[i]->opmethod = method;
-        m[i]->avalue = a;
-        m[i]->bvalue = b;
-        m[i]->partialresult = 0;
-        l = l + m[i]->size;
-        pthread_create(&thread[i],&attribute,Process,(void *) m[i]);
+            me[i]->myid = i;
+            if(rem != 0){
+                me[i]->size = s + 1;
+                rem = rem - 1;
+            } 
+            else
+                me[i]->size = s;
+            me[i]->opmode = mode;
+            me[i]->opmethod = method;
+            me[i]->size_a = m;
+            me[i]->carryA = 0;
+            me[i]->remainder = 0;
+
+        pthread_create(&thread[i],&attribute,Process,(void *) me[i]);
         }
 
         pthread_attr_destroy(&attribute);
@@ -233,12 +219,10 @@ int main(int argc, char **argv){
 
     } else {
         Usage(argv[0]);
-        return EXIT_FAILURE;
     }
 
     // Liberar memoria
     free(numbers[0]);
     free(numbers[1]);
     free(numbers);
-
-}
+} 
