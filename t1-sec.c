@@ -70,126 +70,101 @@ void read_data(int *m, int *n, int ***numbers)
 
 void russian(int **numbers, int m, int n) {
 
-    int i, k; //Indices y contadores de los bucles
-    int carryA, carryB, carry_sum; // Varuiables para el acarreo 
-    int prod, temp, actual, sum; //Variables auxiliares para las operaciones
+    clock_t CPU_start, CPU_finish; // Tiempos de CPU
+    time_t wall_start, wall_finish; // Tiempos de Wall
+    long wall_time;
+    float CPU_time;
 
-    int *a = numbers[0]; // fila 0
-    int *b = numbers[1]; // fila 1
+    int i, carryA, carryB, carry_sum, actual, sum, temp;
 
-    int size = m; //Tamaño del arreglo A y luego ir reduciendo si hay 0
+    int *a = numbers[0];
+    int *b = numbers[1];
 
-    //Arreglo para almacenar el resultado si A es impar
-    int max_size = m + n; //Cantidad máxima de dígitos del resultado
+    int size_a = m;                     // tamaño actual de A
+    int size_b = n;                     // tamaño actual de B
+    int max_size = m + n;          // tamaño máximo seguro para result y B (extra para acarreos)
+
+    // Reservamos espacio extra para result y para B
     int *result = (int *)calloc(max_size, sizeof(int));
+    int *B_copy = (int *)calloc(max_size, sizeof(int));
 
+    // Copiamos B en B_copy para multiplicarlo sin afectar original
+    for (i = 0; i < size_b; i = i + 1) {
+        B_copy[i + max_size - size_b] = b[i];
+    }
 
-    // Mientras el número no sea 1
-    while (!(size == 1 && a[0] == 0)) {
+    int start_b = max_size - size_b; // posición inicial de B en el array grande
 
-        carryA = 0; //Se reinicia el carry de A
-        carryB = 0; //Se reinicia el carry de B
+    wall_start = time(NULL);
+    CPU_start = clock();
 
-        if(a[size - 1] % 2 != 0){
-            
-            carry_sum = 0;  // Reiniciar carry para la suma
-            k = max_size - n;
+    while (!(size_a == 1 && a[0] == 0)) {
+        carryA = 0;
+        carryB = 0;
 
-            for (i = n - 1; i >= 0; i = i - 1) {
-                sum = result[k + i] + b[i] + carry_sum;
-                result[k + i] = sum % 10;
+        // Si A es impar, sumamos B_copy a result
+        if (a[size_a - 1] % 2 != 0) {
+            carry_sum = 0;
+            int pos_result = max_size - 1;
+            int pos_b = max_size - 1;
+
+            // Sumar B_copy a result
+            while(pos_b >= start_b) {
+                sum = result[pos_result] + B_copy[pos_b] + carry_sum;
+                result[pos_result] = sum % 10;
                 carry_sum = sum / 10;
+
+                pos_result = pos_result - 1;
+                pos_b = pos_b - 1;
             }
 
-            // Propagar carry si sobra
-            while(carry_sum > 0 && k > 0){
-                k = k - 1;
-                sum = result[k] + carry_sum;
-                result[k] = sum % 10;
+            // Propagar carry restante
+            while(carry_sum > 0 && pos_result >= 0) {
+                sum = result[pos_result] + carry_sum;
+                result[pos_result] = sum % 10;
                 carry_sum = sum / 10;
+
+                pos_result = pos_result - 1;
             }
         }
 
-        /*
-        *
-        */
-        //Dividir el arreglo A
-        for (i = 0; i < size; i = i + 1) {
+        // Dividir A entre 2
+        for (i = 0; i < size_a; i = i + 1) {
             actual = carryA * 10 + a[i];
             a[i] = actual / 2;
             carryA = actual % 2;
         }
 
-        // Eliminar ceros a la izquierda
-        while (size > 1 && a[0] == 0) {
-            for (i = 0; i < size - 1; i = i + 1) {
+        // Eliminar ceros a la izquierda de A
+        while (size_a > 1 && a[0] == 0) {
+            for (i = 0; i < size_a - 1; i = i + 1) {
                 a[i] = a[i + 1];
             }
-            size = size - 1;
+            size_a = size_a - 1;
         }
-        /*
-        *
-        */
-        //Multiplicar arreglo B
-        // Recorremos de derecha a izquierda
-        for(i = n - 1; i >= 0; i = i - 1)
-        {
-            temp = b[i] * 2 + carryB;
-            b[i] = temp % 10;
+
+        // Multiplicar B_copy por 2
+        for (i = max_size - 1; i >= start_b; i = i - 1) {
+            temp = B_copy[i] * 2 + carryB;
+            B_copy[i] = temp % 10;
             carryB = temp / 10;
         }
 
-        // Si después de procesar todos los dígitos aún queda un acarreo
-        if(carryB > 0)
-        {
-            // Desplazamos a la derecha
-            for(i = n; i > 0; i = i - 1)
-            {
-                b[i] = b[i-1];
-            }
-            b[0] = carryB;
-            n = n + 1; // Aumentamos la longitud del número
-        }
-        /*
-        *
-        */
-       /*
-
-        // Debug: mostrar paso
-        printf("A: ");
-        for (i = 0; i < size; i = i + 1) 
-            printf("%d", a[i]);
-
-        printf(" | B: ");
-        for (i = 0; i < n; i = i + 1) 
-            printf("%d", b[i]);
-
-        printf("\tResult: ");
-        for (i = 0; i < max_size; i = i + 1) 
-            printf("%d", result[i]);
-        printf("\n\n");
-        */
-    }
-
-    if (a[0] == 1) {
-
-        carry_sum = 0;
-        k = max_size - n;
-
-        for (i = n - 1; i >= 0; i = i - 1) {
-            sum = result[k + i] + b[i] + carry_sum;
-            result[k + i] = sum % 10;
-            carry_sum = sum / 10;
-        }
-        while(carry_sum > 0 && k > 0) {
-            sum = result[k] + carry_sum;
-            result[k] = sum % 10;
-            carry_sum = sum / 10;
-            k = k - 1;
+        // Propagar carry al inicio de B_copy
+        while (carryB > 0) {
+            start_b = start_b - 1;
+            B_copy[start_b] = carryB % 10;
+            carryB /= 10;
         }
     }
-    
-    // Eliminar ceros a la izquierda
+
+    CPU_finish = clock();
+    wall_finish = time(NULL);
+
+    wall_time = (long)(wall_finish - wall_start); // Cálculo de tiempo de procesos (Wall time)
+    CPU_time = (float)(CPU_finish - CPU_start) / CLOCKS_PER_SEC; // Cálculo de tiempo de CPU (CPU time)
+
+    //Quitar 0 a la izquierda del resultado
     while (max_size > 1 && result[0] == 0) {
         for (i = 0; i < max_size - 1; i = i + 1) {
             result[i] = result[i + 1];
@@ -197,47 +172,14 @@ void russian(int **numbers, int m, int n) {
         max_size = max_size - 1;
     }
 
-    printf("\tResult: ");
-    for (i = 0; i < max_size; i = i + 1) 
+
+    printf("\n\tResult: ");
+    for (i = 0; i < max_size; i = i + 1){
         printf("%d", result[i]);
-    printf("\n\n");
-    
-
-    free(result);
-}
-
-
-/*
-//funcion con el metodo de multiplicacion rusa
-void russian_secuential(unsigned long long int a, unsigned long long b){
-
-    unsigned long long int multiply = 0;
-    long E_wall;
-    float E_cpu;
-    clock_t start, finish; // Tiempos de CPU
-    time_t  ts, te;
-
-    ts = time(NULL);
-    start = clock();
-
-    start = clock();
-    while (a >= 1 && b > 0) {
-        if (a % 2 != 0) { // Si a es impar
-            multiply = multiply + b;
-        }
-        a = a / 2; // Dividir a entre 2
-        b = b * 2; // Multiplicar b por 2
     }
-    finish = clock();
-    te = time(NULL);
-
-    E_wall = (long) (te - ts);
-    E_cpu = (float)(finish - start)/CLOCKS_PER_SEC;
-
-    printf("\nMultiplication result: %llu\n", multiply);
-    printf("CPU time: %f\n", E_cpu);
-    printf("Wall time: %f\n", E_wall);
-
+    printf("\n");
+    printf("\nTiempo de ejecución CPU (segundos): %f\n", CPU_time);
+    printf("Tiempo de ejecución total (segundos): %ld\n", wall_time);
 }
 
 
@@ -283,8 +225,8 @@ void traditional_mult(unsigned long long int a, unsigned long long int b)
 *
 *
 */
-/*
-void print_data(unsigned int **numbers, unsigned int m, unsigned int n){
+
+void print_data(int **numbers, int m, int n){
     int i;
 
     printf("****** Archivo utilizado ******\n");
@@ -327,7 +269,7 @@ int main (int argc, char **argv){
         
         // Mostrar resultados
         if (mode == VERBOSE){
-            //print_data(numbers, m, n);
+            print_data(numbers, m, n);
         }
 
         // Ejecutar multiplicación según opción
