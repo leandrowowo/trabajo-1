@@ -29,7 +29,8 @@ void Usage(char *argv[])
     exit(1);
 }
 
-void read_data(int *m, int *n, int ***numbers)
+// readData: función que lee los datos desde el archivo de entrada
+void readData(int *m, int *n, int ***numbers)
 {
     int i, j;
 
@@ -52,6 +53,7 @@ void read_data(int *m, int *n, int ***numbers)
     }
 }
 
+// Process: función que realiza la multiplicación
 int *Process(int **numbers, int m, int n, int *result_size, float *CPU_time, long *Wall_time)
 {
     int *a, *b, *result, i, j;
@@ -113,7 +115,7 @@ void printData(int mode)
     float CPU_time;
     long Wall_time;
 
-    read_data(&m, &n, &numbers);
+    readData(&m, &n, &numbers);
 
     resultado = Process(numbers, m, n, &resultado_size, &CPU_time, &Wall_time);
 
@@ -144,7 +146,7 @@ void printData(int mode)
         printf("Resultado: ");
         for (i = 0; i < resultado_size; i = i + 1)
         {
-            printf("%d", resultado[i]);
+            printf("%d", resultado[i]); // Imprime los dígitos del resultado de la multiplicación
         }
         
         printf("\nTiempo de ejecución CPU (segundos): %f\n", CPU_time);
@@ -152,6 +154,7 @@ void printData(int mode)
     }
 
     // Liberación de memoria
+    free(resultado);
     free(numbers[0]);
     free(numbers[1]);
     free(numbers);
