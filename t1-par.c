@@ -36,13 +36,12 @@ struct Message{
     opmethod,   //método de operación(Tradicional o Ruso)
     size_a,     //tamaño del arreglo a
     carryA,     //acarreo del arreglo a
-    remainder;  //resto de la división entre 2 del arreglo a
 };
 
 
 //variable global
 int **numbers; //arreglo bidimensional donde esta el datafile
-int *a; //arreglo para el primer número y segundo numero
+int *a, *b; //arreglo para el primer número y segundo numero
 
 
 
@@ -56,25 +55,33 @@ void *Process(void *p) {
     int i, actual;
 
     if(me->opmethod == RUSSIAN) {
+        while(!(me->size_a == 1 && a[0] == 1)) {
 
-        //DIVISIÓN ENTRE 2 DEL ARREGLO A
-        if(me->opmode == VERBOSE) {
-            printf("\n\n**************************************\n");
-            printf("Hilo %d: comenzando la división de todo el arreglo (size = %d)\n", me->myid, me->size_a);
-        }
+            //DIVISION DE A EN 2 CON EL HILO 0
+            me->carryA = 0;
+            if(me->myid == 0){ // Solo el hilo 0 divide A entre 2
+                for(i = 0; i < me->size_a; i = i + 1) {
+                    actual = me->carryA * 10 + a[i];
+                    a[i] = actual / 2;
+                    me->carryA = actual % 2;
 
-        me->carryA = 0;  // carry inicial
-        for(i = 0; i < me->size_a; i = i + 1) {
-            actual = me->carryA * 10 + a[i];
-            a[i] = actual / 2;
-            me->carryA = actual % 2;
+                    if(me->opmode == VERBOSE)
+                        printf("Hilo %d, a[%d] = %d, carry = %d\n", me->myid, i, a[i], me->carryA);
+                }
 
+                // Eliminar ceros a la izquierda
+                while(me->size_a > 1 && a[0] == 0) {
+                    for(i = 0; i < me->size_a - 1; i = i + 1)
+                        a[i] = a[i + 1];
+                    me->size_a = me->size_a - 1;
+                }
+            }
             if(me->opmode == VERBOSE)
-                printf("Hilo %d, a[%d] = %d, carry = %d\n", me->myid, i, a[i], me->carryA);
+                printf("Hilo %d terminó paso con carry = %d, tamaño actual = %d\n\n", me->myid, me->carryA, me->size_a);
         }
 
         if(me->opmode == VERBOSE)
-            printf("Hilo %d terminó con carry = %d\n", me->myid, me->carryA);
+            printf("Hilo %d terminó, arreglo A = 1\n", me->myid);
     }
 
     pthread_exit(NULL);
@@ -178,6 +185,11 @@ int main(int argc, char **argv){
         a = (int *)calloc(m, sizeof(int));
         for (i = 0; i < m; i = i + 1){
             a[i] = numbers[0][i]; // primer numero
+        }
+
+        b = (int *)calloc(m, sizeof(int));
+        for (i = 0; i < n; i = i + 1){
+            a[i] = numbers[1][i]; // primer numero
         }
         
         me = calloc(k, sizeof(struct Message *));
