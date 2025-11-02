@@ -74,12 +74,12 @@ int *Process(int **numbers, int m, int n, int *result_size, float *CPU_time, lon
     {
         for(j = m - 1; j >= 0; j = j - 1)
         {
-            result[i+j+1] = result[i+j+1] + a[j] * b[i];
+            result[i+j+1] = result[i+j+1] + b[i] * a[j];
         }
     }
 
     // Proceso de acarreo
-    for(i = *result_size; i > 0; i = i - 1)
+    for(i = *result_size - 1; i > 0; i = i - 1)
     {
         if(result[i] >= 10)
         {
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 {
     int mode;
 
-    if(argc != 2)
+    if(argc != 2 || (strcmp(argv[1], "-V") && strcmp(argv[1], "-S")))
     {
         Usage(argv);
     }
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
             mode = VERBOSE;
             printData(mode);
         }
-        else if(!strcmp(argv[1], "-S"))
+        else
         {
             mode = SILENT;
             printData(mode);
