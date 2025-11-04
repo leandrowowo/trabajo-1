@@ -64,7 +64,7 @@ int *Process(int **numbers, int m, int n, int *result_size, float *CPU_time, lon
     b = numbers[1];
 
     *result_size = m + n; // Cantidad máxima de dígitos del resultado de la multiplicación
-    result = (int *)calloc(*result_size, sizeof(int));
+    result = calloc(*result_size, sizeof(int));
 
     wall_start = time(NULL);
     CPU_start = clock();
