@@ -182,11 +182,11 @@ int main(int argc, char **argv)
         }
 
         pthread_attr_init(&attribute);
-        pthread_attr_setdetachstate(&attribute,PTHREAD_CREATE_JOINABLE);
+        pthread_attr_setdetachstate(&attribute, PTHREAD_CREATE_JOINABLE);
         
         chunk_size = m / numthreads;
         rem = m % numthreads;
-        index = m-1;
+        index = m - 1;
 
         // Cálculo de multiplicaciones parciales
         for(i = 0; i < numthreads; i = i + 1)
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 
         for (i = 0; i < numthreads; i = i + 1)
         {
-            pthread_join(thread[i],&exit_status);
+            pthread_join(thread[i], &exit_status);
         }
 
         // Suma de resultados parciales
