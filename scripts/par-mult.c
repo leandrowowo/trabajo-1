@@ -250,5 +250,18 @@ int main(int argc, char **argv)
         printData(mode, resultado, result_size);
     }
 
+    // Liberación de memoria
+    for(i = 0; i < numthreads; i = i + 1)
+    {
+        free(mess[i]);
+        free(resultado_parcial[i]);
+    }
+    free(mess);
+    free(resultado_parcial);
+    free(thread);
+    free(resultado);
+    free(a);
+    free(b);
+
     return 0;
 }
