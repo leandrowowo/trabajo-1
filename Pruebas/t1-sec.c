@@ -5,6 +5,7 @@
  * DESCRIPTION: Realizar la multiplicación de dos numeros (n y m) con el metodo ruso.
  *             El programa debe ser capaz de correr en dos modos:
  *              - Tradicional.        
+ *              - Paralelizado (utilizando pthreads).
  * 
  * AUTHOR: Delian Santis López - Leandro Aballay Henriquez
  * 
@@ -181,6 +182,45 @@ void russian(int **numbers, int m, int n) {
     printf("Tiempo de ejecución total (segundos): %ld\n", wall_time);
 }
 
+
+/*
+*
+*
+*/
+//funcion de multiplicacion tradicional
+/*
+void traditional_mult(unsigned long long int a, unsigned long long int b)
+{
+    unsigned int digit;
+    long E_wall;
+    float E_cpu;
+    unsigned long long partial_result ,valor = 0, factor = 1;              // Equivale a las potencias de 10 al momento de multiplicar y correrse un espacio
+    clock_t start, finish; // Tiempos de CPU
+    time_t  ts, te;
+
+    ts = time(NULL);
+    start = clock();
+    while(b > 0)
+    {
+        digit = b % 10;                          // Toma el último dígito del segundo factor
+        partial_result = a * digit;
+        valor = valor + partial_result * factor; //Se simula que el resultado se corre un espacio a la izquierda en base al factor
+        b = b / 10;                              // Divide por 10 para tomar el siguiente digito a multiplicar en la próxima iteración
+        factor = factor * 10; 
+        
+    }
+    finish = clock();
+    te = time(NULL);
+
+    E_wall = (long) (te - ts);
+    E_cpu = (float)(finish - start)/CLOCKS_PER_SEC;
+
+    printf("\nMultiplication result: %llu\n", valor);
+    printf("CPU time: %f\n", E_cpu);
+    printf("Wall time: %f\n", E_wall);
+}
+
+
 /*
 *
 *
@@ -200,6 +240,7 @@ void print_data(int **numbers, int m, int n){
     {
         printf("%u\n", numbers[1][i]);  // imprimir digitos par la fila 1
     }
+    
 }
 
  /*
