@@ -39,6 +39,41 @@ void readData()
     }
 }
 
+void printData(int mode, int *result, int result_size)
+{
+    int i, j;
+
+    if(mode == SILENT)
+    {
+        printf("Número de dígitos primer valor: %d\n", m);
+        printf("Número de dígitos segundo valor: %d\n", n);
+    }
+    else if(mode == VERBOSE)
+    {
+        printf("\nContenido del archivo\n");
+        printf("---------------------\n");
+
+        printf("%d\n", m);
+        for(i = 0; i < m; i = i + 1)
+        {
+            printf("%d\n", a[i]);
+        }
+
+        printf("%d\n", n);
+        for(j = 0; j < n; j = j + 1)
+        {
+            printf("%d\n", b[j]);
+        }
+
+        printf("\nResultado: ");
+        for (i = 0; i < result_size; i = i + 1)
+        {
+            printf("%d", result[i]);
+        }
+        printf("\n");
+    }
+}
+
 void *Process_tradMult(void *p)
 {
     struct Message_trad *me;
