@@ -10,7 +10,7 @@ int *a, *b; // Números a multiplicar 'a' y 'b'
 int m, n;   // Tamaños 'm' y 'n' de 'a' y 'b', respectivamente
 
 
-struct Message
+struct Message_trad
 {
     int thread_id; // Identificador del hilo
     int *partial_result; // Arreglo con resultado parcial en cada hilo
@@ -18,9 +18,30 @@ struct Message
     int index; // Índice de cada hilo
 };
 
+void readData()
+{
+    int i, j;
+
+    // Lee el primer número para a
+    scanf("%d", &m);
+    a = (int *)calloc(m, sizeof(int));
+    for(i = 0; i < m; i = i + 1)
+    {
+        scanf("%d", &a[i]);
+    }
+
+    // Lee el segundo número para b
+    scanf("%d", &n);
+    b = (int *)calloc(n, sizeof(int));
+    for(j = 0; j < n; j = j + 1)
+    {
+        scanf("%d", &b[j]);
+    }
+}
+
 void *Process_tradMult(void *p)
 {
-    struct Message *me;
+    struct Message_trad *me;
     int i, j;
     int cindex_start, cindex_finish; // Variables para el control de índices de los hilos
     clock_t CPU_start, CPU_finish; // Tiempo inicial y final de CPU
@@ -56,12 +77,12 @@ void *Process_tradMult(void *p)
 }
 
 
-void Traditional(int k, char mode)
+void Traditional(int k, int mode)
 {
     pthread_t *thread; // Arreglo de hilos
     pthread_attr_t attribute;
-    struct Message **mess;
-    int mode, numthreads, i, j, k, result_size, chunk_size, rem, index;
+    struct Message_trad **mess;
+    int mode, numthreads, i, j, result_size, chunk_size, rem, index;
     int **resultado_parcial, *resultado;
     void *exit_status;
     
@@ -76,7 +97,7 @@ void Traditional(int k, char mode)
     mess = calloc(numthreads, sizeof(struct Message *));
     for(i = 0; i < numthreads; i = i + 1)
     {
-        mess[i] = calloc(1, sizeof(struct Message));
+        mess[i] = calloc(1, sizeof(struct Message_trad));
         resultado_parcial[i] = calloc(result_size, sizeof(int));
     }
 
