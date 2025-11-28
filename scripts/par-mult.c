@@ -29,7 +29,7 @@ struct Message
 {
     int thread_id; // Identificador del hilo
     int *partial_result; // Arreglo con resultado parcial en cada hilo
-    int chunk_size; // Tamaño del chunnumthreads
+    int chunk_size; // Tamaño del chunk que trabaja cada hilo
     int index; // Índice de cada hilo
 };
 
@@ -39,7 +39,7 @@ struct Message
 */
 void Usage(char *argv[])
 {
-    printf("Usage: %s -O -numthreads < <input archive> \n\nwhere:\n\t O in {V, S}\n\t numthreads: threads number\n", argv[0]);
+    printf("Usage: %s -O k < <input archive> \n\nwhere:\n\t O in {V, S}\n\t k: threads number\n", argv[0]);
     exit(1);
 }
 
