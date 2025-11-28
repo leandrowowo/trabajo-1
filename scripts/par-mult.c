@@ -39,7 +39,7 @@ struct Message
 */
 void Usage(char *argv[])
 {
-    printf("Usage: %s -O k < <input archive> \n\nwhere:\n\t O in {V, S}\n\t k: threads number\n", argv[0]);
+    printf("Usage: %s k -O < <input archive> \n\nwhere:\n\t O in {V, S}\n\t k: threads number\n", argv[0]);
     exit(1);
 }
 
@@ -151,22 +151,22 @@ int main(int argc, char **argv)
     int **resultado_parcial, *resultado;
     void *exit_status;
 
-    if(argc != 3 || (strcmp(argv[1], "-V") && strcmp(argv[1], "-S")))
+    if(argc != 3 || (strcmp(argv[2], "-V") && strcmp(argv[2], "-S")))
     {
         Usage(argv);
     }
     else
     {
-        if(!strcmp(argv[1], "-V"))
+        if(!strcmp(argv[2], "-V"))
         {
             mode = VERBOSE;
         }
-        else if(!strcmp(argv[1], "-S"))
+        else if(!strcmp(argv[2], "-S"))
         {
             mode = SILENT;
         }
         
-        numthreads = atoi(argv[2]);
+        numthreads = atoi(argv[1]);
 
         readData();
 
