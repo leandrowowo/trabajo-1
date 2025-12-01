@@ -124,7 +124,7 @@ void printData(int mode)
         printf("Número de dígitos primer valor: %d\n", m);
         printf("Número de dígitos segundo valor: %d\n", n);
         printf("Tiempo de ejecución CPU (segundos): %f\n", CPU_time);
-        printf("Tiempo de ejecución total (segundos): %f\n", Wall_time);
+        printf("Tiempo de ejecución total (segundos): %ld\n", Wall_time);
     }
     else if(mode == VERBOSE)
     {
